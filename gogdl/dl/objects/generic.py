@@ -48,46 +48,53 @@ class ChunkTask:
 
     compressed_md5: str
     md5: str
+
+    compressed_size: int
     size: int
-    download_size: int
-    
-    cleanup: bool = False
-    offload_to_cache: bool = False
-    old_offset: Optional[int] = None
-    old_flags: TaskFlag = TaskFlag.NONE 
-    old_file: Optional[str] = None
+
+    memory_segments: list[MemorySegment]
+
+    flag: TaskFlag
 
 @dataclass
-class V1Task:
-    product: str
-    index: int
-    offset: int
-    size: int
-    md5: str
-    cleanup: Optional[bool] = True
+class Task:
+    flag: TaskFlag
+    file_path: Optional[str] = None
+    file_index: Optional[int] = None
 
-    old_offset: Optional[int] = None
-    offload_to_cache: Optional[bool] = False
-    old_flags: TaskFlag = TaskFlag.NONE 
-    old_file: Optional[str] = None
+    chunks: Optional[list[ChunkTask]] = None
 
-    # This isn't actual sum, but unique id of chunk we use to decide 
-    # if we should push it to writer
-    @property
-    def compressed_md5(self):
-        return self.md5 + "_" + str(self.index)
+    target_path: Optional[str] = None
+    source_path: Optional[str] = None
+
+    old_file_index: Optional[int] = None
+
+    data: Optional[bytes] = None
 
 @dataclass
 class FileTask:
+    index: int
     path: str
-    flags: TaskFlag
+    md5: str
+    size: int
+    chunks: list[ChunkTask]
 
-    old_flags: TaskFlag = TaskFlag.NONE 
-    old_file: Optional[str] = None
-
-    patch_file: Optional[str] = None
-
+    flag: TaskFlag
 
 @dataclass
-class TerminateWorker:
-    pass
+class FileInfo:
+    index: int
+    path: str
+    md5: str
+    size: int
+
+    def __eq__(self, other):
+        if not isinstance(other, FileInfo):
+            return False
+        return (self.path, self.md5, self.size) == (other.path, other.md5, other.size)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.path, self.md5, self.size))

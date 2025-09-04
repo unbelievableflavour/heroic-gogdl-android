@@ -128,4 +128,3 @@ def load_game_details(path):
             dlcs.append(data["gameId"])
 
     return (os.path.join(base_path, f"goggame-{root_id}.info"), os.path.join(base_path, f"goggame-{root_id}.id") if build_id else None, platform, dlcs)
-

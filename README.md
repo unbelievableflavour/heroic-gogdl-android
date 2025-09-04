@@ -1,6 +1,6 @@
-# heroic-gogdl
+# heroic-gogdl-android
 
-GOG download module for [Heroic Games Launcher](https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher)
+Fork of GOG download module for Heroic, but with android compatibility to use in [GameNative](https://github.com/utkarshdalal/GameNative).
 
 ## Important note
 
@@ -24,8 +24,8 @@ Heroic uses `$XDG_CONFIG_HOME/heroic/gog_store/auth.json`
 Here is the command to pull the source code
 
 ```
-git clone https://github.com/Heroic-Games-Launcher/heroic-gogdl
-cd heroic-gogdl
+git clone https://github.com/Heroic-Games-Launcher/heroic-gogdl-android
+cd heroic-gogdl-android
 ./bin/gogdl --help
 ```
 

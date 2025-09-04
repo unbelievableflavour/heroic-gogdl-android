@@ -1,228 +1,63 @@
-# Initialize argparse module and return arguments
-import argparse
-from multiprocessing import cpu_count
+"""
+Android-compatible argument parser for GOGDL
+"""
 
+import argparse
+from gogdl import constants
 
 def init_parser():
+    """Initialize argument parser with Android-compatible defaults"""
+    
     parser = argparse.ArgumentParser(
-        description="GOG downloader for Heroic Games Launcher"
+        description='Android-compatible GOG downloader',
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
-
+    
     parser.add_argument(
-        "--version",
-        "-v",
-        dest="display_version",
-        action="store_true",
-        help="Display GOGDL version",
+        '--auth-config-path',
+        type=str,
+        default=f"{constants.ANDROID_DATA_DIR}/gog_auth.json",
+        help='Path to authentication config file'
     )
-
-    parser.add_argument("--auth-config-path", dest="auth_config_path",
-                        help="Path to json file where tokens will be stored", required=True)
-
-    subparsers = parser.add_subparsers(dest="command")
-
-    import_parser = subparsers.add_parser(
-        "import", help="Show data about game in the specified path"
+    
+    parser.add_argument(
+        '--display-version',
+        action='store_true',
+        help='Display version information'
     )
-    import_parser.add_argument("path")
-
-    # REDIST DOWNLOAD
-
-    redist_download_parser = subparsers.add_parser("redist", aliases=["dependencies"],
-                                                   help="Download specified dependencies to provided location")
-
-    redist_download_parser.add_argument("--ids", help="Coma separated ids")
-    redist_download_parser.add_argument("--path", help="Location where to download the files")
-    redist_download_parser.add_argument("--print-manifest", action="store_true", help="Prints manifest to stdout and exits")
-    redist_download_parser.add_argument(
-        "--max-workers",
-        dest="workers_count",
-        default=cpu_count(),
-        help="Specify number of worker threads, by default number of CPU threads",
-    )
-
-
-    # AUTH
-
-    auth_parser = subparsers.add_parser("auth", help="Manage authorization")
-    auth_parser.add_argument("--client-id", dest="client_id")
-    auth_parser.add_argument("--client-secret", dest="client_secret")
-    auth_parser.add_argument("--code", dest="authorization_code",
-                             help="Pass authorization code (use for login), when passed client-id and secret are ignored")
-
-    # DOWNLOAD
-
-    download_parser = subparsers.add_parser(
-        "download", aliases=["repair", "update"], help="Download/update/repair game"
-    )
-    download_parser.add_argument("id", help="Game id")
-    download_parser.add_argument("--lang", "-l", help="Specify game language")
-    download_parser.add_argument(
-        "--build", "-b", dest="build", help="Specify buildId"
-    )
-    download_parser.add_argument(
-        "--path", "-p", dest="path", help="Specify download path", required=True
-    )
-    download_parser.add_argument("--support", dest="support_path", help="Specify path where support files should be stored, by default they are put into game dir")
-    download_parser.add_argument(
-        "--platform",
-        "--os",
-        dest="platform",
-        help="Target opearting system",
-        choices=["windows", "osx", "linux"],
-    )
-    download_parser.add_argument(
-        "--with-dlcs", dest="dlcs", action="store_true", help="Should download all dlcs"
-    )
-    download_parser.add_argument(
-        "--skip-dlcs", dest="dlcs", action="store_false", help="Should skip all dlcs"
-    )
-    download_parser.add_argument(
-        "--dlcs",
-        dest="dlcs_list",
-        default=[],
-        help="List of dlc ids to download (separated by coma)",
-    )
-    download_parser.add_argument(
-        "--dlc-only", dest="dlc_only", action="store_true", help="Download only DLC"
-    )
-    download_parser.add_argument("--branch", help="Choose build branch to use")
-    download_parser.add_argument("--password", help="Password to access other branches")
-    download_parser.add_argument("--force-gen", choices=["1", "2"], dest="force_generation", help="Force specific manifest generation (FOR DEBUGGING)")
-    download_parser.add_argument(
-        "--max-workers",
-        dest="workers_count",
-        default=cpu_count(),
-        help="Specify number of worker threads, by default number of CPU threads",
-    )
-
-    # SIZE CALCULATING, AND OTHER MANIFEST INFO
-
-    calculate_size_parser = subparsers.add_parser(
-        "info", help="Calculates estimated download size and list of DLCs"
-    )
-
-    calculate_size_parser.add_argument(
-        "--with-dlcs",
-        dest="dlcs",
-        action="store_true",
-        help="Should download all dlcs",
-    )
-    calculate_size_parser.add_argument(
-        "--skip-dlcs", dest="dlcs", action="store_false", help="Should skip all dlcs"
-    )
-    calculate_size_parser.add_argument(
-        "--dlcs",
-        dest="dlcs_list",
-        help="Coma separated list of dlc ids to download",
-    )
-    calculate_size_parser.add_argument(
-        "--dlc-only", dest="dlc_only", action="store_true", help="Download only DLC"
-    )
-    calculate_size_parser.add_argument("id")
-    calculate_size_parser.add_argument(
-        "--platform",
-        "--os",
-        dest="platform",
-        help="Target opearting system",
-        choices=["windows", "osx", "linux"],
-    )
-    calculate_size_parser.add_argument(
-        "--build", "-b", dest="build", help="Specify buildId"
-    )
-    calculate_size_parser.add_argument("--lang", "-l", help="Specify game language")
-    calculate_size_parser.add_argument("--branch", help="Choose build branch to use")
-    calculate_size_parser.add_argument("--password", help="Password to access other branches")
-    calculate_size_parser.add_argument("--force-gen", choices=["1", "2"], dest="force_generation", help="Force specific manifest generation (FOR DEBUGGING)")
-    calculate_size_parser.add_argument(
-        "--max-workers",
-        dest="workers_count",
-        default=cpu_count(),
-        help="Specify number of worker threads, by default number of CPU threads",
-    )
-
-    # LAUNCH
-
-    launch_parser = subparsers.add_parser(
-        "launch", help="Launch the game in specified path", add_help=False
-    )
-    launch_parser.add_argument("path")
-    launch_parser.add_argument("id")
-    launch_parser.add_argument(
-        "--platform",
-        "--os",
-        dest="platform",
-        help="Target opearting system",
-        choices=["windows", "osx", "linux"],
-        required=True,
-    )
-    launch_parser.add_argument("--prefer-task", dest="preferred_task", default=None, help="Select playTask index to be run")
-    launch_parser.add_argument(
-        "--no-wine", action="store_true", dest="dont_use_wine", default=False
-    )
-    launch_parser.add_argument("--wine", dest="wine", help="Specify wine bin path")
-    launch_parser.add_argument("--wine-prefix", dest="wine_prefix")
-    launch_parser.add_argument("--wrapper", dest="wrapper")
-    launch_parser.add_argument(
-        "--override-exe", dest="override_exe", help="Override executable to be run"
-    )
-
-    # SAVES
-
-    save_parser = subparsers.add_parser("save-sync", help="Sync game saves")
-    save_parser.add_argument("path", help="Path to sync files")
-    save_parser.add_argument("id", help="Game id")
-    save_parser.add_argument(
-        "--ts", dest="timestamp", help="Last sync timestamp", required=True
-    )
-    save_parser.add_argument("--name", dest="dirname", default="__default")
-    save_parser.add_argument(
-        "--skip-download", dest="prefered_action", action="store_const", const="upload"
-    )
-    save_parser.add_argument(
-        "--skip-upload", dest="prefered_action", action="store_const", const="download"
-    )
-    save_parser.add_argument(
-        "--force-upload",
-        dest="prefered_action",
-        action="store_const",
-        const="forceupload",
-    )
-    save_parser.add_argument(
-        "--force-download",
-        dest="prefered_action",
-        action="store_const",
-        const="forcedownload",
-    )
-
-    save_parser.add_argument(
-        "--os",
-        "--platform",
-        dest="platform",
-        help="Target opearting system",
-        choices=["windows", "osx", "linux"],
-        required=True,
-    )
-
-    # SAVES CLEAR
-
-    clear_parser = subparsers.add_parser("save-clear", help="Clear cloud game saves")
-    clear_parser.add_argument("path", help="Path to sync files")
-    clear_parser.add_argument("id", help="Game id")
-    clear_parser.add_argument("--name", dest="dirname", default="__default")
-
-    clear_parser.add_argument(
-        "--os",
-        "--platform",
-        dest="platform",
-        help="Target opearting system",
-        choices=["windows", "osx", "linux"],
-        required=True,
-    )
-
-    # Languages
-
-    locale_parser = subparsers.add_parser("lang-match", help="Query GOG language data for given locale code/name")
-    locale_parser.add_argument("language", help="Language query to match")
-
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Auth command
+    auth_parser = subparsers.add_parser('auth', help='Authenticate with GOG')
+    auth_parser.add_argument('--code', type=str, required=True, help='Authorization code from GOG')
+    
+    # Download command
+    download_parser = subparsers.add_parser('download', help='Download a game')
+    download_parser.add_argument('id', type=str, help='Game ID to download')
+    download_parser.add_argument('--path', type=str, default=constants.ANDROID_GAMES_DIR, help='Download path')
+    download_parser.add_argument('--platform', type=str, default='windows', choices=['windows', 'linux'], help='Platform')
+    download_parser.add_argument('--branch', type=str, help='Game branch to download')
+    download_parser.add_argument('--skip-dlcs', action='store_true', help='Skip DLC downloads')
+    download_parser.add_argument('--workers-count', type=int, default=2, help='Number of worker threads')
+    download_parser.add_argument('--file-pattern', type=str, help='File pattern to match')
+    
+    # Info command
+    info_parser = subparsers.add_parser('info', help='Get game information')
+    info_parser.add_argument('id', type=str, help='Game ID')
+    info_parser.add_argument('--platform', type=str, default='windows', choices=['windows', 'linux'], help='Platform')
+    
+    # Repair command
+    repair_parser = subparsers.add_parser('repair', help='Repair/verify game files')
+    repair_parser.add_argument('id', type=str, help='Game ID to repair')
+    repair_parser.add_argument('--path', type=str, default=constants.ANDROID_GAMES_DIR, help='Game path')
+    repair_parser.add_argument('--platform', type=str, default='windows', choices=['windows', 'linux'], help='Platform')
+    
+    # Save sync command
+    save_parser = subparsers.add_parser('save-sync', help='Sync game saves')
+    save_parser.add_argument('path', help='Path to sync files')
+    save_parser.add_argument('--dirname', help='Cloud save directory name')
+    save_parser.add_argument('--timestamp', type=float, default=0.0, help='Last sync timestamp')
+    save_parser.add_argument('--prefered-action', choices=['upload', 'download', 'none'], help='Preferred sync action')
+    
     return parser.parse_known_args()
